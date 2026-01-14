@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chambres - EasyBooking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🏨 EasyBooking</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="rooms.html">Chambres</a>
+          </li>
+          <li class="nav-item" id="reservationsNav">
+            <a class="nav-link" href="reservations.html">Mes réservations</a>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-danger btn-sm ms-2" onclick="logout()" id="logoutBtn" style="display: none;">Déconnexion</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="container-fluid">
+      <h1>Nos Chambres</h1>
+      <p>Sélectionnez une chambre pour réserver</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container-fluid">
+    <div id="floorsContainer"></div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Réserver une chambre</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="bookingForm">
+            <div class="mb-3">
+              <label for="roomName" class="form-label">Chambre</label>
+              <input type="text" class="form-control" id="roomName" disabled>
+            </div>
+            <div class="mb-3">
+              <label for="startTime" class="form-label">Date et heure de début</label>
+              <input type="datetime-local" class="form-control" id="startTime" required>
+            </div>
+            <div class="mb-3">
+              <label for="endTime" class="form-label">Date et heure de fin</label>
+              <input type="datetime-local" class="form-control" id="endTime" required>
+            </div>
+            <div class="mb-3">
+              <label for="guests" class="form-label">Nombre de personnes</label>
+              <input type="number" class="form-control" id="guests" min="1" required>
+            </div>
+            <div class="mb-3">
+              <label for="notes" class="form-label">Notes (optionnel)</label>
+              <textarea class="form-control" id="notes" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Confirmer la réservation</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 EasyBooking - Tous droits réservés</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    let currentRoomId = null;
+    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+
+    // Check authentication
+    if (!isLoggedIn()) {
+      showAlert('Veuillez vous connecter pour réserver', 'warning');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    } else {
+      document.getElementById('logoutBtn').style.display = 'block';
+      document.getElementById('reservationsNav').style.display = 'block';
+      loadRooms();
+    }
+
+    async function loadRooms() {
+      try {
+        const response = await getAllRooms();
+        const rooms = response.data;
+
+        // Group rooms by floor
+        const floors = {};
+        rooms.forEach(room => {
+          if (!floors[room.floor]) {
+            floors[room.floor] = [];
+          }
+          floors[room.floor].push(room);
+        });
+
+        // Display rooms
+        const container = document.getElementById('floorsContainer');
+        container.innerHTML = '';
+
+        Object.keys(floors).sort((a, b) => a - b).forEach(floor => {
+          const floorDiv = document.createElement('div');
+          floorDiv.innerHTML = `
+            <h3 class="mt-4" style="color: #9B59B6;">Étage ${floor}</h3>
+            <div class="floor-container" id="floor-${floor}"></div>
+          `;
+          container.appendChild(floorDiv);
+
+          const floorContainer = document.getElementById(`floor-${floor}`);
+          floors[floor].forEach(room => {
+            const capacity = room.capacity === 1 ? '1 personne' : `${room.capacity} personnes`;
+            const statusClass = room.isAvailable ? 'available' : 'unavailable';
+            const statusText = room.isAvailable ? 'Disponible' : 'Indisponible';
+
+            const roomCard = document.createElement('div');
+            roomCard.className = `card room-card ${statusClass}`;
+            roomCard.innerHTML = `
+              <div class="room-status ${statusClass}">${statusText}</div>
+              <div class="card-body">
+                <h5 class="card-title">🌍 ${room.name}</h5>
+                <p class="card-text">Capacité: ${capacity}</p>
+                <button class="btn btn-primary w-100" onclick="openBooking('${room._id}', '${room.name}', ${room.capacity})" 
+                  ${!room.isAvailable ? 'disabled' : ''}>Réserver</button>
+              </div>
+            `;
+            floorContainer.appendChild(roomCard);
+          });
+        });
+      } catch (error) {
+        showAlert('Erreur lors du chargement des chambres', 'danger');
+      }
+    }
+
+    function openBooking(roomId, roomName, capacity) {
+      currentRoomId = roomId;
+      document.getElementById('roomName').value = roomName;
+      document.getElementById('guests').max = capacity;
+      document.getElementById('guests').value = 1;
+      bookingModal.show();
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const numberOfGuests = parseInt(document.getElementById('guests').value);
+      const notes = document.getElementById('notes').value;
+
+      const result = await createReservation(currentRoomId, startTime, endTime, numberOfGuests, notes);
+
+      if (result.success) {
+        showAlert('Réservation créée avec succès!', 'success');
+        bookingModal.hide();
+        document.getElementById('bookingForm').reset();
+        setTimeout(() => {
+          window.location.href = 'reservations.html';
+        }, 1500);
+      } else {
+        showAlert(result.data.message || 'Erreur lors de la réservation', 'danger');
+      }
+    });
+  </script>
+</body>
+</html>
