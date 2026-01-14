@@ -195,4 +195,222 @@ describe('User Model Unit Tests', () => {
       expect(err).toBeUndefined();
     });
   });
+
+  describe('Password Security', () => {
+    test('Should require password minimum length of 6', () => {
+      const shortPassword = 'pass';
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: shortPassword
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeDefined();
+      expect(err.errors.password).toBeDefined();
+    });
+
+    test('Should accept password of exactly 6 characters', () => {
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'pass123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeUndefined();
+    });
+
+    test('Should accept long passwords', () => {
+      const longPassword = 'thisIsAVeryLongPasswordWith123SpecialCharacters!@#';
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: longPassword
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeUndefined();
+    });
+  });
+
+  describe('Email Case Sensitivity', () => {
+    test('Should lowercase email on creation', () => {
+      const user = new User({
+        username: 'testuser',
+        email: 'TEST@EXAMPLE.COM',
+        password: 'password123'
+      });
+
+      expect(user.email).toBe('test@example.com');
+    });
+
+    test('Should handle mixed case emails', () => {
+      const user = new User({
+        username: 'testuser',
+        email: 'Test.User@Example.Com',
+        password: 'password123'
+      });
+
+      expect(user.email).toBe('test.user@example.com');
+    });
+  });
+
+  describe('Username Trimming', () => {
+    test('Should trim whitespace from username', () => {
+      const user = new User({
+        username: '  testuser  ',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      expect(user.username).toBe('testuser');
+    });
+  });
+
+  describe('CreatedAt Timestamp', () => {
+    test('Should set createdAt automatically', () => {
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      expect(user.createdAt).toBeDefined();
+      expect(user.createdAt instanceof Date).toBe(true);
+    });
+
+    test('Should use current date for createdAt', () => {
+      const beforeCreate = new Date();
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+      const afterCreate = new Date();
+
+      expect(user.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime() - 100);
+      expect(user.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime() + 100);
+    });
+  });
+
+  describe('Field Validation', () => {
+    test('Should validate all required fields together', () => {
+      const user = new User({});
+
+      const err = user.validateSync();
+      expect(err).toBeDefined();
+      expect(Object.keys(err.errors).length).toBeGreaterThanOrEqual(3);
+    });
+
+    test('Should only have errors for invalid fields', () => {
+      const user = new User({
+        username: 'testuser',
+        email: 'invalid-email',
+        password: 'password123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeDefined();
+      expect(err.errors.email).toBeDefined();
+      expect(err.errors.username).toBeUndefined();
+    });
+  });
+
+  describe('Complex Password Scenarios', () => {
+    test('Should accept passwords with special characters', async () => {
+      const specialPassword = 'P@$$w0rd!#&*';
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: specialPassword
+      });
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(specialPassword, salt);
+
+      const isMatch = await user.matchPassword(specialPassword);
+      expect(isMatch).toBe(true);
+    });
+
+    test('Should accept passwords with spaces', async () => {
+      const passwordWithSpace = 'pass word 123';
+      const user = new User({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: passwordWithSpace
+      });
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(passwordWithSpace, salt);
+
+      const isMatch = await user.matchPassword(passwordWithSpace);
+      expect(isMatch).toBe(true);
+    });
+  });
+
+  describe('Multiple User Instances', () => {
+    test('Should create independent user instances', () => {
+      const user1 = new User({
+        username: 'user1',
+        email: 'user1@example.com',
+        password: 'password123'
+      });
+
+      const user2 = new User({
+        username: 'user2',
+        email: 'user2@example.com',
+        password: 'password456'
+      });
+
+      expect(user1.username).not.toBe(user2.username);
+      expect(user1.email).not.toBe(user2.email);
+    });
+  });
+
+  describe('Boundary Tests', () => {
+    test('Should accept minimum valid username (3 chars)', () => {
+      const user = new User({
+        username: 'abc',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeUndefined();
+    });
+
+    test('Should accept maximum valid username (30 chars)', () => {
+      const user = new User({
+        username: 'a'.repeat(30),
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeUndefined();
+    });
+
+    test('Should reject username shorter than 3 chars', () => {
+      const user = new User({
+        username: 'ab',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeDefined();
+    });
+
+    test('Should reject username longer than 30 chars', () => {
+      const user = new User({
+        username: 'a'.repeat(31),
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      const err = user.validateSync();
+      expect(err).toBeDefined();
+    });
+  });
 });

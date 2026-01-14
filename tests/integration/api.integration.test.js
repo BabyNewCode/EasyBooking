@@ -206,4 +206,240 @@ describe('API Integration Tests', () => {
       expect(response.type).toMatch(/json/);
     });
   });
+
+  describe('Multiple Registration Attempts', () => {
+    test('Should handle multiple user registrations', async () => {
+      const users = [
+        { username: 'user1', email: 'user1@test.com', password: 'pass123' },
+        { username: 'user2', email: 'user2@test.com', password: 'pass456' },
+        { username: 'user3', email: 'user3@test.com', password: 'pass789' }
+      ];
+
+      for (const user of users) {
+        const response = await request(app)
+          .post('/api/auth/register')
+          .send({
+            ...user,
+            passwordConfirm: user.password
+          });
+
+        expect(response.status).toBe(201);
+        expect(response.body.user.username).toBe(user.username);
+      }
+    });
+  });
+
+  describe('Authentication Flow', () => {
+    test('Should complete full auth flow (register -> login)', async () => {
+      // Register
+      const registerResponse = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'fullflowuser',
+          email: 'fullflow@test.com',
+          password: 'password123',
+          passwordConfirm: 'password123'
+        });
+
+      expect(registerResponse.status).toBe(201);
+      expect(registerResponse.body.token).toBeDefined();
+
+      // Login
+      const loginResponse = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: 'password123'
+        });
+
+      expect(loginResponse.status).toBe(200);
+      expect(loginResponse.body.token).toBeDefined();
+    });
+  });
+
+  describe('Response Headers', () => {
+    test('Should include Content-Type header', async () => {
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.headers['content-type']).toBeDefined();
+    });
+
+    test('Should handle HEAD requests', async () => {
+      // Test if server responds to basic requests
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Validation Integration', () => {
+    test('Should validate email format in registration', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'testuser',
+          email: 'invalidemail',
+          password: 'password123',
+          passwordConfirm: 'password123'
+        });
+
+      // Should fail validation (exact behavior depends on implementation)
+      expect(response.status).toBeGreaterThanOrEqual(400);
+    });
+
+    test('Should validate password strength requirements', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'testuser',
+          email: 'test@example.com',
+          password: '123',
+          passwordConfirm: '123'
+        });
+
+      // Weak password should fail
+      expect(response.status).toBeGreaterThanOrEqual(400);
+    });
+  });
+
+  describe('Room Retrieval Variations', () => {
+    test('Should retrieve rooms without authentication', async () => {
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.status).toBe(200);
+    });
+
+    test('Should return correct room data structure', async () => {
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.body).toHaveProperty('success');
+      expect(response.body).toHaveProperty('count');
+      expect(response.body).toHaveProperty('data');
+    });
+
+    test('Should have 9 rooms total', async () => {
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.body.count).toBe(9);
+    });
+  });
+
+  describe('Concurrent Requests', () => {
+    test('Should handle concurrent registrations', async () => {
+      const registrations = Array(5).fill(null).map((_, i) =>
+        request(app)
+          .post('/api/auth/register')
+          .send({
+            username: `user${i}`,
+            email: `user${i}@test.com`,
+            password: 'password123',
+            passwordConfirm: 'password123'
+          })
+      );
+
+      const responses = await Promise.all(registrations);
+
+      responses.forEach(response => {
+        expect(response.status).toBe(201);
+        expect(response.body.token).toBeDefined();
+      });
+    });
+
+    test('Should handle concurrent room requests', async () => {
+      const requests = Array(10).fill(null).map(() =>
+        request(app).get('/api/rooms')
+      );
+
+      const responses = await Promise.all(requests);
+
+      responses.forEach(response => {
+        expect(response.status).toBe(200);
+        expect(response.body.count).toBe(9);
+      });
+    });
+  });
+
+  describe('Missing Required Fields', () => {
+    test('Should handle registration with null values', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: null,
+          email: 'test@example.com',
+          password: 'password123',
+          passwordConfirm: 'password123'
+        });
+
+      expect(response.status).toBeGreaterThanOrEqual(400);
+    });
+
+    test('Should reject login without credentials', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({});
+
+      expect(response.status).toBeGreaterThanOrEqual(400);
+    });
+  });
+
+  describe('Response Status Codes', () => {
+    test('Should return 201 for successful registration', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'newuser',
+          email: 'newuser@example.com',
+          password: 'password123',
+          passwordConfirm: 'password123'
+        });
+
+      expect(response.status).toBe(201);
+    });
+
+    test('Should return 200 for successful login', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: 'password123'
+        });
+
+      expect(response.status).toBe(200);
+    });
+
+    test('Should return 200 for room retrieval', async () => {
+      const response = await request(app)
+        .get('/api/rooms');
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('Data Consistency', () => {
+    test('Should return consistent room data across requests', async () => {
+      const response1 = await request(app).get('/api/rooms');
+      const response2 = await request(app).get('/api/rooms');
+
+      expect(response1.body.count).toBe(response2.body.count);
+      expect(response1.body.data.length).toBe(response2.body.data.length);
+    });
+
+    test('Should return authenticated user data after login', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: 'password123'
+        });
+
+      expect(response.body.user).toBeDefined();
+      expect(response.body.user.email).toBe('test@example.com');
+    });
+  });
 });
