@@ -17,6 +17,16 @@ const pagesPath = path.join(__dirname, '../frontend/pages');
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`📨 ${req.method} ${req.path}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('   Body:', JSON.stringify(req.body).substring(0, 100));
+  }
+  next();
+});
+
 // Serve static files from frontend directory (CSS, JS)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -67,9 +77,17 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅ Serveur démarré sur le port ${PORT}`);
   console.log(`📍 Accédez à http://localhost:${PORT}\n`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
 });
 
 module.exports = app;

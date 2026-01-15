@@ -15,32 +15,43 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password, passwordConfirm } = req.body;
 
+    console.log('📝 Tentative d\'inscription avec:', { username, email });
+
     // Validation
     if (!username || !email || !password || !passwordConfirm) {
+      console.warn('❌ Champs manquants');
       return res.status(400).json({ message: 'Tous les champs sont requis' });
     }
 
     if (password !== passwordConfirm) {
+      console.warn('❌ Les mots de passe ne correspondent pas');
       return res.status(400).json({ message: 'Les mots de passe ne correspondent pas' });
     }
 
     // Check if user exists
     let user = await User.findOne({ $or: [{ email }, { username }] });
     if (user) {
+      console.warn('❌ L\'utilisateur existe déjà');
       return res.status(400).json({ message: 'L\'utilisateur existe déjà' });
     }
 
     // Create user
+    console.log('✏️  Création de l\'utilisateur en BD...');
     user = new User({ username, email, password });
     await user.save();
+    console.log('✅ Utilisateur sauvegardé avec ID:', user._id);
 
     const token = generateToken(user._id);
+    console.log('✅ Token généré');
+    
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
       token,
       user: user.toJSON()
     });
   } catch (error) {
+    console.error('❌ Erreur lors de l\'inscription:', error.message);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
