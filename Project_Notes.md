@@ -92,8 +92,8 @@ Pour mener à bien ce devoir vous utiliserez :
 
 ## Livrables attendues :
 
-    Plan de test complet
-    Fiche de tests + captures ou export d'exécution
-    Code des tests automatisés (Git)
-    Rapport de synthèse qualité
-    Lien Git du projet
+1. Plan de test complet
+2. Fiche de tests + captures ou export d'exécution
+3. Code des tests automatisés (Git)
+4. Rapport de synthèse qualité
+5. Lien Git du projet
