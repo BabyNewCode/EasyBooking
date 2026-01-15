@@ -1,0 +1,222 @@
+/* Couleurs */
+:root {
+    --color-primary: #7c3aed;
+    --color-secondary: #1f2937;
+    --color-light: #f3f4f6;
+    --color-text: #ffffff;
+}
+
+/* Styles généraux */
+body {
+    background-color: #2d3748;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navigation */
+.bg-navbar {
+    background-color: var(--color-primary) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white !important;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: white !important;
+}
+
+/* Hero section */
+.hero-section {
+    background: linear-gradient(135deg, var(--color-secondary) 0%, #1a202c 100%);
+    padding: 100px 0;
+    text-align: center;
+    color: white;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--color-primary);
+}
+
+.hero-section .lead {
+    font-size: 1.5rem;
+    color: #cbd5e0;
+    margin-bottom: 30px;
+}
+
+/* Boutons */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #6d28d9 !important;
+    border-color: #6d28d9 !important;
+}
+
+.btn-outline-primary {
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* Cartes */
+.card {
+    border: none;
+    background-color: #374151;
+    color: white;
+    border-radius: 12px;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.card-title {
+    color: var(--color-primary);
+}
+
+/* Chambres */
+.room-card {
+    background-color: #374151;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    color: white;
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+    border-color: var(--color-primary);
+}
+
+.room-card h3 {
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
+
+.room-capacity {
+    font-size: 0.9rem;
+    color: #cbd5e0;
+}
+
+/* Formulaires */
+.form-control {
+    background-color: #4b5563;
+    border-color: #5a6b7a;
+    color: white;
+}
+
+.form-control:focus {
+    background-color: #4b5563;
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
+}
+
+.form-label {
+    color: white;
+    font-weight: 500;
+}
+
+/* Messages */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.alert-danger {
+    background-color: #ef4444;
+    color: white;
+}
+
+.alert-info {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Table */
+.table {
+    color: white;
+}
+
+.table-dark {
+    background-color: #374151;
+}
+
+.table thead th {
+    border-color: #5a6b7a;
+    color: var(--color-primary);
+}
+
+.table tbody tr {
+    border-color: #5a6b7a;
+}
+
+.table tbody tr:hover {
+    background-color: #4b5563;
+}
+
+/* Modal */
+.modal-content {
+    background-color: #374151;
+    color: white;
+    border: none;
+}
+
+.modal-header {
+    border-color: #5a6b7a;
+}
+
+.modal-footer {
+    border-color: #5a6b7a;
+}
+
+/* Footer */
+footer {
+    background-color: var(--color-primary) !important;
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 1rem;
+    }
+
+    .room-card {
+        margin-bottom: 15px;
+    }
+}

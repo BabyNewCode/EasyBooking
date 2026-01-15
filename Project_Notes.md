@@ -6,7 +6,10 @@ Bienvenue dans la mission EasyBooking ! Dans cette tâche vous créerez une mini
 ## Critères d'évalutation :
 
 L'évalutaion du projet portera sur la mise en place de tests unitaires, des tests d'intégration, des tests de performances et des tests de sécurités.
-Vous avez la possibilité de réaliser au minimum 4 types de tests selon votre choix. Minimum 10 cas de test par type de test.
+    Il faut réaliser au minimum 4 types de tests selon votre choix.
+    Minimum 10 cas de test par type de test.
+    Max 95-100 tests au global, prioriser les tests essentiels ou importants.
+
 
 
 ## Aperçu d'EasyBooking
@@ -66,7 +69,7 @@ En suivant ces instructions étape par étape, vous pourrez créer une applicati
 
 Pour mener à bien ce devoir vous utiliserez :
 1. les technos suivantes :
-    - Utilisation de Mongo Compass & Mongo Atlass pour la BDD
+    - Utilisation de Mongo Compass & Mongo Atlass pour la BDD / lien : mongodb+srv://samiamokrane_db_user:mjWJ6YknZwmadx06@easybooking.tq2wnra.mongodb.net/
     - Utilisation de Boostrap pour le CSS frontend
     - Utilisation de JavaScript pour le backend
     - Utiliser les technos et outils les plus simple pour développer l'appication web
