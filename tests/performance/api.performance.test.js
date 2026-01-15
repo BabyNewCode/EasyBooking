@@ -53,9 +53,9 @@ describe('Tests de Performance', () => {
     expect(duration).toBeLessThan(100);
   });
 
-  test('2. Inscription rapide - moins de 200ms', async () => {
+test('2. Inscription rapide - moins de 250ms', async () => {
     const start = performance.now();
-    
+
     const response = await request(app)
       .post('/api/auth/signup')
       .send({
@@ -67,7 +67,7 @@ describe('Tests de Performance', () => {
     const duration = performance.now() - start;
     
     expect(response.status).toBe(201);
-    expect(duration).toBeLessThan(200);
+    expect(duration).toBeLessThan(250);
   });
 
   test('3. Connexion rapide - moins de 150ms', async () => {

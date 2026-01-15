@@ -51,10 +51,13 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 // Connexion à la base de données et démarrage du serveur
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Serveur lancé sur le port ${PORT}`);
+// Seulement si le script est exécuté directement (pas dans les tests)
+if (require.main === module) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Serveur lancé sur le port ${PORT}`);
+    });
   });
-});
+}
 
 module.exports = app;

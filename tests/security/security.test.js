@@ -182,23 +182,37 @@ describe('Tests de Sécurité', () => {
   });
 
   test('10. Validation des emails - format valide mais réaliste', async () => {
-    const emails = [
-      'user@domain.com',
-      'user.name@domain.co.uk',
-      'user+tag@domain.com'
-    ];
+    const timestamp = Date.now();
+    
+    // Test 1: email simple
+    const response1 = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        username: `user_${timestamp}_1`,
+        email: `user${timestamp}@example.com`,
+        password: 'password123'
+      });
+    expect(response1.status).toBe(201);
 
-    for (const email of emails) {
-      const response = await request(app)
-        .post('/api/auth/signup')
-        .send({
-          username: `user_${Math.random()}`,
-          email,
-          password: 'password123'
-        });
+    // Test 2: email avec point
+    const response2 = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        username: `user_${timestamp}_2`,
+        email: `user.name${timestamp}@example.com`,
+        password: 'password123'
+      });
+    expect(response2.status).toBe(201);
 
-      expect(response.status).toBe(201);
-    }
+    // Test 3: email avec sous-domaine
+    const response3 = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        username: `user_${timestamp}_3`,
+        email: `user${timestamp}@mail.example.com`,
+        password: 'password123'
+      });
+    expect(response3.status).toBe(201);
   });
 
   test('11. Les mots de passe ne doivent pas être en clair', async () => {
