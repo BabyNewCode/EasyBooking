@@ -11,15 +11,16 @@ connectDB().catch(err => {
 });
 
 const app = express();
-const pagesPath = path.join(__dirname, '../../src/frontend/pages');
+const pagesPath = path.join(__dirname, '../frontend/pages');
 
 // Middleware
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(express.static('src/frontend'));
+// Serve static files from frontend directory (CSS, JS)
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Routes
+// Routes API
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/rooms', require('./routes/roomRoutes'));
 app.use('/api/reservations', require('./routes/reservationRoutes'));
@@ -29,24 +30,24 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ message: 'Server is running' });
 });
 
-// Serve HTML pages explicitly
+// Serve HTML pages
 app.get('/', (req, res) => {
   res.sendFile(path.join(pagesPath, 'index.html'));
 });
 
-app.get('/register.html', (req, res) => {
+app.get('/register', (req, res) => {
   res.sendFile(path.join(pagesPath, 'register.html'));
 });
 
-app.get('/login.html', (req, res) => {
+app.get('/login', (req, res) => {
   res.sendFile(path.join(pagesPath, 'login.html'));
 });
 
-app.get('/rooms.html', (req, res) => {
+app.get('/rooms', (req, res) => {
   res.sendFile(path.join(pagesPath, 'rooms.html'));
 });
 
-app.get('/reservations.html', (req, res) => {
+app.get('/reservations', (req, res) => {
   res.sendFile(path.join(pagesPath, 'reservations.html'));
 });
 

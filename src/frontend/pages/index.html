@@ -5,32 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accueil - EasyBooking</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">🏨 EasyBooking</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="rooms.html">Chambres</a>
-          </li>
-          <li class="nav-item" id="reservationsNav" style="display: none;">
-            <a class="nav-link" href="reservations.html">Mes réservations</a>
-          </li>
-          <li class="nav-item" id="authButtons">
-            <a class="nav-link" href="login.html">Connexion</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+  <!-- Navbar will be injected by navbar.js -->
+  
   <!-- Hero Section -->
   <div class="hero">
     <div class="container-fluid">
@@ -45,7 +24,7 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100">
           <div class="card-body text-center">
-            <h5 class="card-title">🔐 Sécurisé</h5>
+            <h5 class="card-title">Sécurisé</h5>
             <p class="card-text">Vos données sont protégées avec les dernières normes de sécurité</p>
           </div>
         </div>
@@ -53,7 +32,7 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100">
           <div class="card-body text-center">
-            <h5 class="card-title">⚡ Rapide</h5>
+            <h5 class="card-title">Rapide</h5>
             <p class="card-text">Réservez une chambre en quelques clics seulement</p>
           </div>
         </div>
@@ -61,7 +40,7 @@
       <div class="col-md-4 mb-4">
         <div class="card h-100">
           <div class="card-body text-center">
-            <h5 class="card-title">🌟 Pratique</h5>
+            <h5 class="card-title">Pratique</h5>
             <p class="card-text">Gérez vos réservations depuis un seul endroit</p>
           </div>
         </div>
@@ -72,7 +51,7 @@
       <div class="col-12">
         <h2 style="color: #9B59B6;">Nos 9 Chambres</h2>
         <p>Réparties sur 3 étages avec différentes capacités</p>
-        <a href="rooms.html" class="btn btn-primary btn-lg mt-3">Voir les chambres</a>
+        <a href="/rooms" class="btn btn-primary btn-lg mt-3">Voir les chambres</a>
       </div>
     </div>
   </div>
@@ -83,18 +62,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/api.js"></script>
-  <script>
-    // Check if user is logged in and update navbar
-    if (isLoggedIn()) {
-      const authButtons = document.getElementById('authButtons');
-      const user = getCurrentUser();
-      authButtons.innerHTML = `
-        <span class="nav-link" style="color: #9B59B6;">Bienvenue, ${user.username}!</span>
-        <button class="btn btn-danger btn-sm ms-2" onclick="logout()">Déconnexion</button>
-      `;
-      document.getElementById('reservationsNav').style.display = 'block';
-    }
-  </script>
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
 </body>
 </html>

@@ -5,15 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion - EasyBooking</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="../pages/index.html">🏨 EasyBooking</a>
-    </div>
-  </nav>
+  <!-- Navbar will be injected by navbar.js -->
 
   <!-- Login Container -->
   <div class="container">
@@ -33,9 +28,10 @@
                 <label for="password" class="form-label">Mot de passe</label>
                 <input type="password" class="form-control" id="password" name="password" required>
               </div>
+              <div id="alertBox"></div>
               <button type="submit" class="btn btn-primary w-100 mb-3">Se connecter</button>
               <p class="text-center">
-                Pas encore de compte ? <a href="register.html" style="color: #9B59B6;">S'inscrire</a>
+                Pas encore de compte ? <a href="/register" style="color: #9B59B6;">S'inscrire</a>
               </p>
             </form>
           </div>
@@ -45,7 +41,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/api.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -58,12 +55,17 @@
       if (result.success) {
         showAlert('Connexion réussie!', 'success');
         setTimeout(() => {
-          window.location.href = 'rooms.html';
+          window.location.href = '/rooms';
         }, 1500);
       } else {
         showAlert(result.message || 'Erreur lors de la connexion', 'danger');
       }
     });
+
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
   </script>
 </body>
 </html>

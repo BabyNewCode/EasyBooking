@@ -5,185 +5,232 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chambres - EasyBooking</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .room-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+    
+    .room-box {
+      background: white;
+      border: 3px solid #ddd;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .room-box:hover {
+      transform: translateY(-10px);
+      border-color: #9B59B6;
+      box-shadow: 0 8px 24px rgba(155,89,182,0.3);
+    }
+    
+    .room-name {
+      font-size: 2em;
+      font-weight: bold;
+      color: #9B59B6;
+      margin: 15px 0;
+    }
+    
+    .capacity-badge {
+      display: inline-block;
+      background-color: #9B59B6;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    
+    .reserve-btn {
+      background-color: #9B59B6;
+      border-color: #9B59B6;
+      color: white;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-weight: bold;
+    }
+    
+    .reserve-btn:hover {
+      background-color: #7d3e8f;
+      border-color: #7d3e8f;
+      color: white;
+    }
+
+    .floor-section {
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+
+    .floor-title {
+      font-size: 2em;
+      color: #9B59B6;
+      font-weight: bold;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #9B59B6;
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">🏨 EasyBooking</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="rooms.html">Chambres</a>
-          </li>
-          <li class="nav-item" id="reservationsNav">
-            <a class="nav-link" href="reservations.html">Mes réservations</a>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-danger btn-sm ms-2" onclick="logout()" id="logoutBtn" style="display: none;">Déconnexion</button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Navbar will be injected by navbar.js -->
 
   <!-- Hero Section -->
   <div class="hero">
     <div class="container-fluid">
-      <h1>Nos Chambres</h1>
-      <p>Sélectionnez une chambre pour réserver</p>
+      <h1>Réservez Votre Chambre</h1>
+      <p>Sélectionnez une chambre pour voir les disponibilités</p>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="container-fluid">
-    <div id="floorsContainer"></div>
+  <div class="container-fluid p-5">
+    <div id="alertContainer"></div>
+    <div id="roomsContainer" class="loading">Chargement des chambres...</div>
   </div>
-
-  <!-- Booking Modal -->
-  <div class="modal fade" id="bookingModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Réserver une chambre</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="bookingForm">
-            <div class="mb-3">
-              <label for="roomName" class="form-label">Chambre</label>
-              <input type="text" class="form-control" id="roomName" disabled>
-            </div>
-            <div class="mb-3">
-              <label for="startTime" class="form-label">Date et heure de début</label>
-              <input type="datetime-local" class="form-control" id="startTime" required>
-            </div>
-            <div class="mb-3">
-              <label for="endTime" class="form-label">Date et heure de fin</label>
-              <input type="datetime-local" class="form-control" id="endTime" required>
-            </div>
-            <div class="mb-3">
-              <label for="guests" class="form-label">Nombre de personnes</label>
-              <input type="number" class="form-control" id="guests" min="1" required>
-            </div>
-            <div class="mb-3">
-              <label for="notes" class="form-label">Notes (optionnel)</label>
-              <textarea class="form-control" id="notes" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Confirmer la réservation</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2026 EasyBooking - Tous droits réservés</p>
-  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/api.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
   <script>
-    let currentRoomId = null;
-    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
-
-    // Check authentication
-    if (!isLoggedIn()) {
-      showAlert('Veuillez vous connecter pour réserver', 'warning');
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 2000);
-    } else {
-      document.getElementById('logoutBtn').style.display = 'block';
-      document.getElementById('reservationsNav').style.display = 'block';
-      loadRooms();
+    function showAlert(message, type = 'info') {
+      const container = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      container.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
     }
 
     async function loadRooms() {
       try {
-        const response = await getAllRooms();
-        const rooms = response.data;
+        console.log('📍 Chargement des chambres...');
+        const response = await APIClient.get('/rooms');
+        
+        if (!response.ok) {
+          showAlert('Erreur: impossible de charger les chambres', 'danger');
+          return;
+        }
+
+        const rooms = await response.json();
+        console.log('✅ Chambres reçues:', rooms);
+
+        if (!Array.isArray(rooms) || rooms.length === 0) {
+          document.getElementById('roomsContainer').innerHTML = '<div class="alert alert-warning">Aucune chambre disponible</div>';
+          return;
+        }
 
         // Group rooms by floor
-        const floors = {};
+        const byFloor = {};
         rooms.forEach(room => {
-          if (!floors[room.floor]) {
-            floors[room.floor] = [];
-          }
-          floors[room.floor].push(room);
+          if (!byFloor[room.floor]) byFloor[room.floor] = [];
+          byFloor[room.floor].push(room);
         });
 
-        // Display rooms
-        const container = document.getElementById('floorsContainer');
-        container.innerHTML = '';
-
-        Object.keys(floors).sort((a, b) => a - b).forEach(floor => {
-          const floorDiv = document.createElement('div');
-          floorDiv.innerHTML = `
-            <h3 class="mt-4" style="color: #9B59B6;">Étage ${floor}</h3>
-            <div class="floor-container" id="floor-${floor}"></div>
-          `;
-          container.appendChild(floorDiv);
-
-          const floorContainer = document.getElementById(`floor-${floor}`);
-          floors[floor].forEach(room => {
-            const capacity = room.capacity === 1 ? '1 personne' : `${room.capacity} personnes`;
-            const statusClass = room.isAvailable ? 'available' : 'unavailable';
-            const statusText = room.isAvailable ? 'Disponible' : 'Indisponible';
-
-            const roomCard = document.createElement('div');
-            roomCard.className = `card room-card ${statusClass}`;
-            roomCard.innerHTML = `
-              <div class="room-status ${statusClass}">${statusText}</div>
-              <div class="card-body">
-                <h5 class="card-title">🌍 ${room.name}</h5>
-                <p class="card-text">Capacité: ${capacity}</p>
-                <button class="btn btn-primary w-100" onclick="openBooking('${room._id}', '${room.name}', ${room.capacity})" 
-                  ${!room.isAvailable ? 'disabled' : ''}>Réserver</button>
+        // Generate HTML for each floor
+        let html = '';
+        [1, 2, 3].forEach(floor => {
+          if (byFloor[floor]) {
+            html += `
+              <div class="floor-section">
+                <h2 class="floor-title">Étage ${floor} - ${floor === 1 ? 'Chambres 1 personne' : floor === 2 ? 'Chambres 2 personnes' : 'Chambres 4 personnes'}</h2>
+                <div class="room-grid">
+            `;
+            
+            byFloor[floor].forEach(room => {
+              html += `
+                <div class="room-box" onclick="selectRoom('${room._id}', '${room.name}', ${room.capacity})">
+                  <div class="room-name">${room.name}</div>
+                  <div class="capacity-badge">Capacité: ${room.capacity} personne${room.capacity > 1 ? 's' : ''}</div>
+                  <button type="button" class="btn reserve-btn">Réserver cette chambre</button>
+                </div>
+              `;
+            });
+            
+            html += `
+                </div>
               </div>
             `;
-            floorContainer.appendChild(roomCard);
-          });
+          }
         });
+
+        document.getElementById('roomsContainer').innerHTML = html;
       } catch (error) {
+        console.error('❌ Erreur:', error);
         showAlert('Erreur lors du chargement des chambres', 'danger');
       }
     }
 
-    function openBooking(roomId, roomName, capacity) {
-      currentRoomId = roomId;
-      document.getElementById('roomName').value = roomName;
-      document.getElementById('guests').max = capacity;
-      document.getElementById('guests').value = 1;
-      bookingModal.show();
+    function selectRoom(roomId, roomName, capacity) {
+      // Check if user is logged in
+      if (!localStorage.getItem('token')) {
+        showAlert('Veuillez vous connecter pour réserver', 'warning');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+        return;
+      }
+
+      // Prompt for reservation details
+      const startDate = prompt(`Réserver: ${roomName}\n\nCapacité: ${capacity} personne${capacity > 1 ? 's' : ''}\n\nDate d'arrivée (YYYY-MM-DD):`);
+      if (!startDate) return;
+
+      const endDate = prompt('Date de départ (YYYY-MM-DD):');
+      if (!endDate) return;
+
+      const numGuests = prompt(`Nombre d'invités (max ${capacity}):`, '1');
+      if (!numGuests) return;
+
+      const guestCount = parseInt(numGuests);
+      if (isNaN(guestCount) || guestCount < 1 || guestCount > capacity) {
+        showAlert(`Le nombre d'invités doit être entre 1 et ${capacity}`, 'danger');
+        return;
+      }
+
+      // Create reservation
+      createReservationRequest(roomId, startDate, endDate, guestCount);
     }
 
-    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function createReservationRequest(roomId, startDate, endDate, numGuests) {
+      try {
+        const startDateTime = new Date(`${startDate}T14:00:00`).toISOString();
+        const endDateTime = new Date(`${endDate}T10:00:00`).toISOString();
 
-      const startTime = document.getElementById('startTime').value;
-      const endTime = document.getElementById('endTime').value;
-      const numberOfGuests = parseInt(document.getElementById('guests').value);
-      const notes = document.getElementById('notes').value;
+        const response = await APIClient.post('/reservations', {
+          roomId: roomId,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          numberOfGuests: numGuests,
+          notes: ''
+        });
 
-      const result = await createReservation(currentRoomId, startTime, endTime, numberOfGuests, notes);
-
-      if (result.success) {
-        showAlert('Réservation créée avec succès!', 'success');
-        bookingModal.hide();
-        document.getElementById('bookingForm').reset();
-        setTimeout(() => {
-          window.location.href = 'reservations.html';
-        }, 1500);
-      } else {
-        showAlert(result.data.message || 'Erreur lors de la réservation', 'danger');
+        if (response.ok) {
+          const data = await response.json();
+          showAlert('✅ Réservation confirmée!', 'success');
+          setTimeout(() => {
+            window.location.href = '/reservations';
+          }, 1500);
+        } else {
+          const error = await response.json();
+          showAlert(`Erreur: ${error.message || 'Impossible de créer la réservation'}`, 'danger');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la création:', error);
+        showAlert('Erreur lors de la création de la réservation', 'danger');
       }
-    });
+    }
+
+    // Load rooms on page load
+    document.addEventListener('DOMContentLoaded', loadRooms);
   </script>
 </body>
 </html>

@@ -5,31 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mes Réservations - EasyBooking</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">🏨 EasyBooking</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="rooms.html">Chambres</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="reservations.html">Mes réservations</a>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-danger btn-sm ms-2" onclick="logout()">Déconnexion</button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Navbar will be injected by navbar.js -->
 
   <!-- Hero Section -->
   <div class="hero">
@@ -40,14 +19,94 @@
   </div>
 
   <!-- Main Content -->
-  <div class="container-fluid">
-    <div id="reservationsContainer"></div>
+  <div class="container-fluid p-5">
+    <div id="alertContainer"></div>
+    <div id="reservationsContainer">
+      <p>Chargement des réservations...</p>
+    </div>
   </div>
 
   <!-- Footer -->
   <footer>
     <p>&copy; 2026 EasyBooking - Tous droits réservés</p>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    // Check if user is logged in
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/login';
+    }
+
+    async function loadReservations() {
+      try {
+        const response = await APIClient.get('/reservations');
+        const data = await response.json();
+
+        if (response.ok && Array.isArray(data)) {
+          if (data.length === 0) {
+            document.getElementById('reservationsContainer').innerHTML = '<p class="text-center mt-5">Vous n\'avez aucune réservation</p>';
+            return;
+          }
+
+          let html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>';
+          html += '<th>Chambre</th><th>Arrivée</th><th>Départ</th><th>Invités</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
+
+          data.forEach(reservation => {
+            const startDate = new Date(reservation.startTime).toLocaleDateString('fr-FR');
+            const endDate = new Date(reservation.endTime).toLocaleDateString('fr-FR');
+            
+            html += `
+              <tr>
+                <td>${reservation.roomId}</td>
+                <td>${startDate}</td>
+                <td>${endDate}</td>
+                <td>${reservation.numberOfGuests}</td>
+                <td><span class="badge bg-info">${reservation.status}</span></td>
+                <td>
+                  <button class="btn btn-sm btn-danger" onclick="cancelReservation('${reservation._id}')">Annuler</button>
+                </td>
+              </tr>
+            `;
+          });
+
+          html += '</tbody></table></div>';
+          document.getElementById('reservationsContainer').innerHTML = html;
+        } else {
+          document.getElementById('reservationsContainer').innerHTML = '<p class="text-center mt-5">Aucune réservation trouvée</p>';
+        }
+      } catch (error) {
+        console.error('Error loading reservations:', error);
+        document.getElementById('alertContainer').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des réservations</div>';
+      }
+    }
+
+    async function cancelReservation(reservationId) {
+      if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation?')) {
+        return;
+      }
+
+      try {
+        const response = await APIClient.delete(`/reservations/${reservationId}`);
+        if (response.ok) {
+          document.getElementById('alertContainer').innerHTML = '<div class="alert alert-success">Réservation annulée</div>';
+          loadReservations();
+        } else {
+          document.getElementById('alertContainer').innerHTML = '<div class="alert alert-danger">Erreur lors de l\'annulation</div>';
+        }
+      } catch (error) {
+        console.error('Error canceling reservation:', error);
+        document.getElementById('alertContainer').innerHTML = '<div class="alert alert-danger">Erreur lors de l\'annulation</div>';
+      }
+    }
+
+    // Load reservations when page loads
+    loadReservations();
+  </script>
+</body>
+</html>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/api.js"></script>

@@ -73,13 +73,15 @@ Pour mener à bien ce devoir vous utiliserez :
 
 2. Ainsi que l'architecture suivante :
     - 9 salles, portant le nom des 9 planètes du système solaire (Platon inclu)
-    - Pour choisir la chambre, possibilité de sélectionner sur un shéma, 3 étages et 3 salles par étage (chaque étage a la même configuration)
+    - Pour choisir la chambre, affichage par box, 3 étages et 3 salles par étage (chaque étage a la même configuration)
     - Nombre de place par chambre :
         - Etage 1 = chambres 1 personne
         - Etage 2 = chambres 2 personnes
         - Etage 3 = chambres 4 personnes
+    - Chaque salle est réservable en cliquant dessus ouverture d'un formulaire avec calendrier et heures
+
 3. Mise en page :
-    - navbar pour une navigation facile
+    - navbar unique pour une navigation facile (logo, Chambres, Connexion)
     - fond anthracite / navbar violet / texte blanc
     - couleur dominante : anthracite & violet
     - style de mise en page propre, soigné et moderne

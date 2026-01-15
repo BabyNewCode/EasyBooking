@@ -31,10 +31,10 @@ class APIClient {
       headers
     });
 
-    if (response.status === 401) {
-      this.removeToken();
-      window.location.href = '/pages/login.html';
-    }
+  if (response.status === 401) {
+    this.removeToken();
+    window.location.href = '/login';
+  }
 
     return response;
   }
@@ -97,7 +97,7 @@ async function register(username, email, password, passwordConfirm) {
 function logout() {
   APIClient.removeToken();
   localStorage.removeItem('user');
-  window.location.href = '/pages/login.html';
+  window.location.href = '/login';
 }
 
 function isLoggedIn() {
